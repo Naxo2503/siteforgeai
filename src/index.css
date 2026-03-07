@@ -1,0 +1,37 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: #060611;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(0,255,136,0.3); color: #fff; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #060611; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.15); border-radius: 10px; }
+textarea:focus, input:focus { outline: none; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: 0.2; }
+  33% { transform: translate(25px,-50px) scale(1.15); opacity: 0.5; }
+  66% { transform: translate(-15px,-90px) scale(0.85); opacity: 0.3; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.15); }
+  50% { box-shadow: 0 0 40px rgba(0,255,136,0.3), 0 0 80px rgba(0,255,136,0.1); }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
