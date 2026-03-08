@@ -472,14 +472,10 @@ RÈGLES :
 10. Images via https://picsum.photos/ ou emojis/SVG
 11. Minimum 3 sections complètes`;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: CONFIG.ANTHROPIC_MODEL,
-          max_tokens: 8000,
-          messages: [{ role: "user", content: prompt }],
-        }),
+        body: JSON.stringify({ prompt }),
       });
 
       const data = await response.json();
