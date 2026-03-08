@@ -503,9 +503,16 @@ RÈGLES :
   }, [url, description, siteType, needsAuth, onOpenAuth, increment]);
 
   useEffect(() => {
-    if (result && iframeRef.current) {
-      const doc = iframeRef.current.contentDocument;
-      doc.open(); doc.write(result); doc.close();
+    if (result && step === 3 && iframeRef.current) {
+      try {
+        const iframe = iframeRef.current;
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(result);
+        doc.close();
+      } catch (e) {
+        console.error("Iframe write error:", e);
+      }
     }
   }, [result, step, viewMode]);
 
@@ -713,7 +720,7 @@ RÈGLES :
                 </div>
                 <div style={{ flex: 1, textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: s.fontBody }}>siteforgeai.com/preview</div>
               </div>
-              <iframe ref={iframeRef} style={{
+              <iframe key={viewMode + step} ref={iframeRef} style={{
                 width: "100%", height: viewMode === "mobile" ? 667 : 520,
                 border: "none", background: "#fff", transition: "height 0.4s ease",
               }} title="Preview" sandbox="allow-scripts" />
