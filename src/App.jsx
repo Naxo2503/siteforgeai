@@ -502,20 +502,6 @@ RÈGLES :
     setLoading(false);
   }, [url, description, siteType, needsAuth, onOpenAuth, increment]);
 
-  useEffect(() => {
-    if (result && step === 3 && iframeRef.current) {
-      try {
-        const iframe = iframeRef.current;
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        doc.open();
-        doc.write(result);
-        doc.close();
-      } catch (e) {
-        console.error("Iframe write error:", e);
-      }
-    }
-  }, [result, step, viewMode]);
-
   return (
     <section id="tool" style={{ padding: "120px 24px", maxWidth: 880, margin: "0 auto" }}>
       <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -720,10 +706,10 @@ RÈGLES :
                 </div>
                 <div style={{ flex: 1, textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: s.fontBody }}>siteforgeai.com/preview</div>
               </div>
-              <iframe key={viewMode + step} ref={iframeRef} style={{
+              <iframe key={viewMode} srcDoc={result} style={{
                 width: "100%", height: viewMode === "mobile" ? 667 : 520,
                 border: "none", background: "#fff", transition: "height 0.4s ease",
-              }} title="Preview" sandbox="allow-scripts" />
+              }} title="Preview" sandbox="allow-scripts allow-same-origin" />
             </div>
 
             {/* Publish CTA */}
