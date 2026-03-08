@@ -452,25 +452,34 @@ function AITool({ onOpenAuth }) {
     }, 500);
 
     try {
-      const prompt = `Tu es un expert world-class en web design et développement front-end. Génère un site web HTML COMPLET et SPECTACULAIRE.
+      const prompt = `Tu es un designer web world-class qui crée des sites EXCEPTIONNELS. Ton travail est au niveau des meilleurs sites sur Awwwards.
 
-${url ? `URL du site actuel : ${url}` : "Pas de site existant, crée from scratch."}
+${url ? `Site actuel de l'utilisateur : ${url}` : "Pas de site existant, crée from scratch."}
 Type : ${siteType === "shopify" ? "Boutique e-commerce / Shopify" : "Site web classique"}
 
-Demande : "${description}"
+Demande de l'utilisateur : "${description}"
 
-RÈGLES :
-1. UNIQUEMENT du code HTML. Pas de markdown, pas de backticks.
-2. Un fichier HTML avec CSS et JS intégrés
-3. Commence par <!DOCTYPE html>, finis par </html>
-4. Design PREMIUM niveau agence à 10 000€
-5. Google Fonts (Outfit, DM Sans ou autre premium)
-6. Animations CSS fluides
-7. 100% responsive mobile-first
-8. Si e-commerce : hero, grille produits avec prix, CTA, header avec panier
-9. Contenu réaliste (pas de Lorem ipsum)
-10. Images via https://picsum.photos/ ou emojis/SVG
-11. Minimum 3 sections complètes`;
+RÈGLES ABSOLUES :
+1. Réponds UNIQUEMENT avec du code HTML. Aucun markdown, aucun backtick, aucune explication.
+2. Un seul fichier HTML avec <style> et <script> intégrés
+3. Commence par <!DOCTYPE html> et finis par </html>
+4. DESIGN EXCEPTIONNEL :
+   - Utilise Google Fonts (2 fonts max : une display + une body)
+   - Palette de 3-4 couleurs max, cohérente et moderne
+   - Beaucoup d'espace blanc (padding généreux : 80px-120px entre sections)
+   - Typographie grande et impactante (hero title : 48px-72px)
+   - Boutons avec hover effects et transitions douces
+   - Ombres subtiles (box-shadow légères)
+   - Border-radius modernes (12px-20px)
+   - Animations CSS au scroll (fade-in, slide-up) avec IntersectionObserver
+5. RESPONSIVE : mobile-first, media queries pour tablet et desktop
+6. CONTENU RÉALISTE : textes crédibles et professionnels, jamais de Lorem ipsum
+7. IMAGES : utilise https://picsum.photos/800/600?random=1 (change le numéro random pour chaque image)
+8. TOUS les liens href doivent être "javascript:void(0)" — aucun lien ne doit naviguer ailleurs
+9. TOUS les boutons doivent avoir onclick="return false" — aucun bouton ne doit naviguer
+10. Si e-commerce : hero, grille produits avec prix en euros, bouton "Ajouter au panier", header avec icône panier, badges promo
+11. Minimum 4 sections complètes : hero + 3 sections de contenu + footer
+12. Le site doit faire "wow" au premier regard. Pense Apple, Stripe, Linear comme références de qualité.`;
 
       const response = await fetch("/api/generate", {
         method: "POST",
