@@ -782,7 +782,7 @@ Demande de l'utilisateur : "${desc}"`;
               </div>
             )}
 
-            {/* Publish CTA */}
+            {/* Upgrade CTA */}
             <div style={{
               marginTop: 16, padding: "20px 24px", borderRadius: 14,
               background: "linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,120,255,0.04))",
@@ -791,15 +791,28 @@ Demande de l'utilisateur : "${desc}"`;
               flexWrap: "wrap", gap: 16,
             }}>
               <div>
-                <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginBottom: 4, fontFamily: s.font }}>Prêt à publier ?</h4>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Domaine + hébergement + SSL à partir de 9€/mois</p>
+                <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginBottom: 4, fontFamily: s.font }}>Tu veux aller plus loin ?</h4>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Éditions illimitées, export du code, support prioritaire</p>
               </div>
               <button onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} style={{
                 padding: "12px 28px", borderRadius: 10, border: "none", cursor: "pointer",
                 background: s.grad, color: s.bg, fontWeight: 700, fontSize: 14, fontFamily: s.font,
                 boxShadow: "0 0 24px rgba(0,255,136,0.2)", whiteSpace: "nowrap",
-              }}>Choisir un plan →</button>
+              }}>Voir les plans →</button>
             </div>
+
+            {/* Export code - paid users only */}
+            {isPaidUser && (
+              <button onClick={() => {
+                const blob = new Blob([result], { type: "text/html" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob); a.download = "mon-site-siteforgeai.html"; a.click();
+              }} style={{
+                marginTop: 10, width: "100%", padding: "11px", borderRadius: 10,
+                border: "1px solid rgba(0,255,136,0.1)", background: "rgba(0,255,136,0.03)",
+                color: "rgba(0,255,136,0.6)", cursor: "pointer", fontSize: 13, fontFamily: s.fontBody,
+              }}>↓ Exporter le code HTML</button>
+            )}
           </div>
         )}
       </div>
@@ -813,14 +826,14 @@ Demande de l'utilisateur : "${desc}"`;
 function Pricing({ onOpenAuth }) {
   const { user } = useAuth();
   const plans = [
-    { name: "Starter", price: "9", desc: "Sites perso & side projects",
-      features: ["1 site publié", "Hébergement SSL", "Sous-domaine .siteforge.ai", "3 modifications/mois", "Support email"],
+    { name: "Starter", price: "9", desc: "Pour les débutants",
+      features: ["Générations IA illimitées", "Mode édition par prompt (3/mois)", "Preview desktop & mobile", "Export code source", "Support email"],
       cta: "Commencer", link: CONFIG.STRIPE_LINKS.starter, hl: false },
     { name: "Pro", price: "29", desc: "Freelances & PME",
-      features: ["5 sites publiés", "Domaine personnalisé", "Modifications illimitées", "Analytics intégrés", "Support prioritaire", "Compatible Shopify"],
+      features: ["Tout Starter inclus", "Éditions illimitées par prompt", "Génération e-commerce / Shopify", "Accès prioritaire aux nouvelles features", "Support prioritaire sous 48h"],
       cta: "Choisir Pro", link: CONFIG.STRIPE_LINKS.pro, hl: true },
     { name: "Business", price: "79", desc: "Agences & équipes",
-      features: ["Sites illimités", "Multi-domaines", "White-label", "Accès API", "Manager dédié", "SLA 99.9%"],
+      features: ["Tout Pro inclus", "Usage commercial illimité", "Support dédié sous 24h", "Sessions consulting IA", "Hébergement inclus (bientôt)"],
       cta: "Nous contacter", link: CONFIG.STRIPE_LINKS.business, hl: false },
   ];
 
@@ -834,9 +847,9 @@ function Pricing({ onOpenAuth }) {
       <div style={{ textAlign: "center", marginBottom: 56 }}>
         <p style={{ color: s.green, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12, fontFamily: s.font }}>PRICING</p>
         <h2 style={{ fontFamily: s.font, fontSize: "clamp(28px,4vw,40px)", fontWeight: 800, color: "#fff", letterSpacing: -1, marginBottom: 12 }}>
-          Génération gratuite. Paiement à la publication.
+          Génération gratuite. Passe Pro pour débloquer tout.
         </h2>
-        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 15 }}>Tu ne sors ta carte que quand tu es convaincu.</p>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 15 }}>Teste gratuitement, upgrade quand tu es convaincu.</p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 16, alignItems: "stretch" }}>
         {plans.map((p, i) => (
@@ -893,11 +906,11 @@ function Pricing({ onOpenAuth }) {
 function FAQ() {
   const [open, setOpen] = useState(null);
   const items = [
-    ["C'est vraiment gratuit pour essayer ?", "Oui ! Tu as 3 générations gratuites sans même créer de compte. Après, inscris-toi gratuitement pour continuer. Tu ne paies que si tu publies."],
+    ["C'est vraiment gratuit pour essayer ?", "Oui ! Tu as 3 générations gratuites sans même créer de compte. Inscris-toi gratuitement pour continuer à générer. Les plans payants débloquent l'édition illimitée et l'export du code."],
     ["Je peux modifier mon site après génération ?", "Oui ! Les utilisateurs connectés peuvent modifier leur site en décrivant les changements souhaités. L'IA applique les modifications en gardant le reste intact."],
-    ["Ça marche avec Shopify ?", "Notre IA génère des pages e-commerce complètes. Tu peux utiliser le code comme base pour ton thème Shopify."],
-    ["Comment fonctionne l'hébergement ?", "Hébergement haute performance avec SSL, CDN global et 99.9% d'uptime. Ton site se charge en moins d'une seconde."],
-    ["Je peux utiliser mon propre domaine ?", "Oui, à partir du plan Pro (29€/mois). Le plan Starter utilise un sous-domaine .siteforge.ai."],
+    ["Ça marche avec Shopify ?", "Notre IA génère des pages e-commerce complètes avec grille produit, panier et CTA. Tu peux exporter le code et l'utiliser comme base pour ton thème Shopify."],
+    ["Je peux récupérer le code de mon site ?", "Oui, les utilisateurs avec un plan payant peuvent exporter le code HTML complet de leur site. Tu peux l'héberger où tu veux."],
+    ["L'hébergement est inclus ?", "Pas encore ! On travaille activement sur une solution d'hébergement en un clic. En attendant, tu peux exporter ton code et l'héberger facilement sur Vercel, Netlify ou tout autre service."],
     ["Mes données sont sécurisées ?", "Authentification sécurisée via Supabase. Paiements par Stripe. On ne stocke jamais tes données de carte."],
   ];
   return (
