@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { useGenerationLimit } from "./useGenerationLimit.js";
 
@@ -6,7 +6,6 @@ import { useGenerationLimit } from "./useGenerationLimit.js";
 // CONFIG
 // ═══════════════════════════════════════════
 const CONFIG = {
-  ANTHROPIC_MODEL: "claude-sonnet-4-20250514",
   STRIPE_LINKS: {
     starter: "https://buy.stripe.com/bJe9AU8980ag6uigkN9oc01",
     pro: "https://buy.stripe.com/fZucN6dtsf5acSGd8B9oc02",
@@ -15,7 +14,7 @@ const CONFIG = {
 };
 
 // ═══════════════════════════════════════════
-// STYLES SHARED
+// SHARED STYLES
 // ═══════════════════════════════════════════
 const s = {
   font: "'Outfit', sans-serif",
@@ -52,7 +51,6 @@ function AuthModal({ open, onClose, initialMode = "login" }) {
     if (!email || !password) return setError("Remplis tous les champs.");
     if (password.length < 6) return setError("Mot de passe : 6 caractères minimum.");
     setLoading(true); setError(null);
-
     if (mode === "signup") {
       const { error: err } = await signUp(email, password);
       if (err) setError(err.message);
@@ -77,37 +75,29 @@ function AuthModal({ open, onClose, initialMode = "login" }) {
       position: "fixed", inset: 0, zIndex: 1000,
       background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      animation: "backdropIn 0.25s ease",
-      padding: 20,
+      animation: "backdropIn 0.25s ease", padding: 20,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
         background: "#0c0c1d", border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 18, padding: "36px 32px", width: "100%", maxWidth: 400,
-        animation: "modalIn 0.3s cubic-bezier(0.16,1,0.3,1)",
-        position: "relative",
+        animation: "modalIn 0.3s cubic-bezier(0.16,1,0.3,1)", position: "relative",
       }}>
-        {/* Close */}
         <button onClick={onClose} style={{
           position: "absolute", top: 14, right: 14, background: "none", border: "none",
           color: "rgba(255,255,255,0.3)", fontSize: 20, cursor: "pointer",
         }}>✕</button>
 
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: s.grad, display: "inline-flex",
-            alignItems: "center", justifyContent: "center",
-            fontWeight: 900, fontSize: 20, color: s.bg,
-            fontFamily: s.font, marginBottom: 14,
+            width: 40, height: 40, borderRadius: 10, background: s.grad,
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 900, fontSize: 20, color: s.bg, fontFamily: s.font, marginBottom: 14,
           }}>S</div>
-          <h2 style={{
-            fontFamily: s.font, fontSize: 22, fontWeight: 700, color: "#fff",
-          }}>
+          <h2 style={{ fontFamily: s.font, fontSize: 22, fontWeight: 700, color: "#fff" }}>
             {mode === "login" ? "Content de te revoir" : "Crée ton compte"}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginTop: 6 }}>
-            {mode === "login" ? "Connecte-toi pour continuer à générer" : "Inscris-toi pour débloquer plus de générations"}
+            {mode === "login" ? "Connecte-toi pour continuer" : "Inscris-toi pour débloquer plus de générations"}
           </p>
         </div>
 
@@ -123,54 +113,39 @@ function AuthModal({ open, onClose, initialMode = "login" }) {
           Continuer avec Google
         </button>
 
-        {/* Divider */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
-        }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
           <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
           <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>ou</span>
           <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
         </div>
 
-        {/* Email form */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input
-            type="email" placeholder="Email" value={email}
-            onChange={e => setEmail(e.target.value)}
+          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
             style={s.inputBase}
             onFocus={e => e.target.style.borderColor = "rgba(0,255,136,0.3)"}
             onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
           />
-          <input
-            type="password" placeholder="Mot de passe" value={password}
-            onChange={e => setPassword(e.target.value)}
+          <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
             style={s.inputBase}
             onFocus={e => e.target.style.borderColor = "rgba(0,255,136,0.3)"}
             onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
           />
-
           {error && <p style={{ color: "#ff4466", fontSize: 13, textAlign: "center" }}>{error}</p>}
           {success && <p style={{ color: s.green, fontSize: 13, textAlign: "center" }}>{success}</p>}
-
           <button onClick={handleSubmit} disabled={loading} style={{
             padding: "13px", borderRadius: 10, border: "none", cursor: "pointer",
-            background: s.grad, color: s.bg,
-            fontWeight: 700, fontSize: 15, fontFamily: s.font,
-            opacity: loading ? 0.6 : 1, transition: "opacity 0.3s",
+            background: s.grad, color: s.bg, fontWeight: 700, fontSize: 15, fontFamily: s.font,
+            opacity: loading ? 0.6 : 1,
           }}>
             {loading ? "..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
           </button>
         </div>
 
-        {/* Toggle */}
         <p style={{ textAlign: "center", marginTop: 18, color: "rgba(255,255,255,0.35)", fontSize: 13 }}>
           {mode === "login" ? "Pas encore de compte ? " : "Déjà un compte ? "}
           <button onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(null); setSuccess(null); }}
-            style={{
-              background: "none", border: "none", color: s.green,
-              cursor: "pointer", fontSize: 13, fontWeight: 600,
-            }}>
+            style={{ background: "none", border: "none", color: s.green, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
             {mode === "login" ? "S'inscrire" : "Se connecter"}
           </button>
         </p>
@@ -184,10 +159,7 @@ function AuthModal({ open, onClose, initialMode = "login" }) {
 // ═══════════════════════════════════════════
 function GridBackground() {
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-      overflow: "hidden", opacity: 0.4,
-    }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden", opacity: 0.4 }}>
       <div style={{
         position: "absolute", inset: 0,
         backgroundImage: `linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px)`,
@@ -240,7 +212,6 @@ function Nav({ active, onNav, onOpenAuth }) {
           SiteForge<span style={{ color: s.green }}>AI</span>
         </span>
       </div>
-
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
         {links.map(([id, label]) => (
           <button key={id} onClick={() => onNav(id)} style={{
@@ -250,17 +221,13 @@ function Nav({ active, onNav, onOpenAuth }) {
             fontSize: 13, fontWeight: 500, fontFamily: s.fontBody, transition: "all 0.25s",
           }}>{label}</button>
         ))}
-
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 12 }}>
             <div style={{
-              width: 30, height: 30, borderRadius: "50%",
-              background: "rgba(0,255,136,0.15)", display: "flex",
-              alignItems: "center", justifyContent: "center",
+              width: 30, height: 30, borderRadius: "50%", background: "rgba(0,255,136,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 12, color: s.green, fontWeight: 700, fontFamily: s.font,
-            }}>
-              {(user.email || "U")[0].toUpperCase()}
-            </div>
+            }}>{(user.email || "U")[0].toUpperCase()}</div>
             <button onClick={signOut} style={{
               padding: "6px 14px", borderRadius: 7, cursor: "pointer",
               background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)",
@@ -367,9 +334,8 @@ function Features() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16 }}>
         {features.map((f, i) => (
           <div key={i} style={{
-            padding: "28px 24px", borderRadius: 14,
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
-            cursor: "default", transition: "all 0.35s",
+            padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.05)", cursor: "default", transition: "all 0.35s",
           }}
           onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,255,136,0.04)"; e.currentTarget.style.borderColor = "rgba(0,255,136,0.12)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "none"; }}
@@ -402,8 +368,7 @@ function HowItWorks() {
       </div>
       {steps.map((st, i) => (
         <div key={i} style={{
-          display: "flex", gap: 28, alignItems: "flex-start",
-          padding: "28px 0",
+          display: "flex", gap: 28, alignItems: "flex-start", padding: "28px 0",
           borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.05)" : "none",
         }}>
           <span style={{
@@ -422,7 +387,7 @@ function HowItWorks() {
 }
 
 // ═══════════════════════════════════════════
-// AI TOOL — with auth gate
+// AI TOOL — with auth gate + edit mode
 // ═══════════════════════════════════════════
 function AITool({ onOpenAuth }) {
   const { user } = useAuth();
@@ -436,28 +401,19 @@ function AITool({ onOpenAuth }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("desktop");
-  const iframeRef = useRef(null);
 
-  const handleGenerate = useCallback(async () => {
-    // Check auth gate
-    if (needsAuth) {
-      onOpenAuth("signup");
-      return;
-    }
+  // Edit mode (paid users only)
+  const [editPrompt, setEditPrompt] = useState("");
+  const [editing, setEditing] = useState(false);
 
-    setLoading(true); setError(null); setProgress(0); setStep(2);
+  // Simulate paid status — in prod, check Stripe subscription via Supabase
+  const isPaidUser = !!user; // For now, any logged-in user can edit. Refine later with Stripe webhook.
 
-    const interval = setInterval(() => {
-      setProgress(p => Math.min(p + Math.random() * 6 + 2, 93));
-    }, 500);
-
-    try {
-      const prompt = `Tu es un designer web world-class qui crée des sites EXCEPTIONNELS. Ton travail est au niveau des meilleurs sites sur Awwwards.
+  const buildPrompt = (desc, existingHtml = null) => {
+    const baseRules = `Tu es un designer web world-class qui crée des sites EXCEPTIONNELS. Ton travail est au niveau des meilleurs sites sur Awwwards.
 
 ${url ? `Site actuel de l'utilisateur : ${url}` : "Pas de site existant, crée from scratch."}
 Type : ${siteType === "shopify" ? "Boutique e-commerce / Shopify" : "Site web classique"}
-
-Demande de l'utilisateur : "${description}"
 
 RÈGLES ABSOLUES :
 1. Réponds UNIQUEMENT avec du code HTML. Aucun markdown, aucun backtick, aucune explication.
@@ -481,6 +437,31 @@ RÈGLES ABSOLUES :
 11. Minimum 4 sections complètes : hero + 3 sections de contenu + footer
 12. Le site doit faire "wow" au premier regard. Pense Apple, Stripe, Linear comme références de qualité.`;
 
+    if (existingHtml) {
+      return `${baseRules}
+
+IMPORTANT : Voici le site HTML actuel que l'utilisateur veut MODIFIER (ne le recrée pas de zéro, améliore-le) :
+
+${existingHtml.substring(0, 6000)}
+
+Modification demandée par l'utilisateur : "${desc}"
+
+Applique UNIQUEMENT les modifications demandées tout en gardant le reste du site intact. Renvoie le HTML COMPLET modifié.`;
+    }
+
+    return `${baseRules}
+
+Demande de l'utilisateur : "${desc}"`;
+  };
+
+  const callAI = useCallback(async (prompt) => {
+    setLoading(true); setError(null); setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress(p => Math.min(p + Math.random() * 6 + 2, 93));
+    }, 500);
+
+    try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -496,9 +477,7 @@ RÈGLES ABSOLUES :
         html = html.replace(/```html\s*/gi, "").replace(/```\s*/gi, "").trim();
         const idx = html.indexOf("<!DOCTYPE");
         if (idx > 0) html = html.substring(idx);
-        setResult(html);
-        increment(); // Count this generation
-        setStep(3);
+        return html;
       } else if (data.error) {
         setError(`Erreur : ${data.error.message || "Réessaie."}`);
       } else {
@@ -509,7 +488,35 @@ RÈGLES ABSOLUES :
       setError("Impossible de contacter l'IA.");
     }
     setLoading(false);
-  }, [url, description, siteType, needsAuth, onOpenAuth, increment]);
+    return null;
+  }, []);
+
+  const handleGenerate = useCallback(async () => {
+    if (needsAuth) { onOpenAuth("signup"); return; }
+    setStep(2);
+    const prompt = buildPrompt(description);
+    const html = await callAI(prompt);
+    if (html) {
+      setResult(html);
+      increment();
+      setStep(3);
+    }
+    setLoading(false);
+  }, [description, url, siteType, needsAuth, onOpenAuth, increment, callAI]);
+
+  const handleEdit = useCallback(async () => {
+    if (!editPrompt.trim()) return;
+    setStep(2);
+    const prompt = buildPrompt(editPrompt, result);
+    const html = await callAI(prompt);
+    if (html) {
+      setResult(html);
+      setStep(3);
+      setEditPrompt("");
+      setEditing(false);
+    }
+    setLoading(false);
+  }, [editPrompt, result, url, siteType, callAI]);
 
   return (
     <section id="tool" style={{ padding: "120px 24px", maxWidth: 880, margin: "0 auto" }}>
@@ -519,7 +526,6 @@ RÈGLES ABSOLUES :
           Génère ton site maintenant
         </h2>
 
-        {/* Generation counter */}
         {!user && (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 8,
@@ -531,19 +537,12 @@ RÈGLES ABSOLUES :
               {Array.from({ length: FREE_LIMIT }).map((_, i) => (
                 <div key={i} style={{
                   width: 8, height: 8, borderRadius: "50%",
-                  background: i < remaining ? s.green : "rgba(255,255,255,0.1)",
-                  transition: "background 0.3s",
+                  background: i < remaining ? s.green : "rgba(255,255,255,0.1)", transition: "background 0.3s",
                 }} />
               ))}
             </div>
-            <span style={{
-              fontSize: 12, color: remaining > 0 ? "rgba(255,255,255,0.5)" : "#ff4466",
-              fontFamily: s.fontBody,
-            }}>
-              {remaining > 0
-                ? `${remaining} génération${remaining > 1 ? "s" : ""} gratuite${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}`
-                : "Inscris-toi pour continuer"
-              }
+            <span style={{ fontSize: 12, color: remaining > 0 ? "rgba(255,255,255,0.5)" : "#ff4466", fontFamily: s.fontBody }}>
+              {remaining > 0 ? `${remaining} génération${remaining > 1 ? "s" : ""} gratuite${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}` : "Inscris-toi pour continuer"}
             </span>
           </div>
         )}
@@ -553,9 +552,7 @@ RÈGLES ABSOLUES :
             marginTop: 16, padding: "8px 18px", borderRadius: 100,
             background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.15)",
           }}>
-            <span style={{ fontSize: 12, color: s.green, fontFamily: s.fontBody }}>
-              ✓ Connecté — Générations illimitées
-            </span>
+            <span style={{ fontSize: 12, color: s.green, fontFamily: s.fontBody }}>✓ Connecté — Générations illimitées</span>
           </div>
         )}
       </div>
@@ -631,7 +628,6 @@ RÈGLES ABSOLUES :
                 }}>{q}</button>
               ))}
             </div>
-
             <button onClick={() => { if (description.trim()) handleGenerate(); }}
               disabled={!description.trim()}
               style={{
@@ -646,7 +642,7 @@ RÈGLES ABSOLUES :
           </div>
         )}
 
-        {/* STEP 2 */}
+        {/* STEP 2: Loading */}
         {step === 2 && loading && (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div style={{
@@ -654,7 +650,9 @@ RÈGLES ABSOLUES :
               border: "3px solid rgba(255,255,255,0.04)", borderTopColor: s.green,
               animation: "spin 0.8s linear infinite",
             }} />
-            <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 700, fontFamily: s.font, marginBottom: 8 }}>L'IA travaille sur ton site...</h3>
+            <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 700, fontFamily: s.font, marginBottom: 8 }}>
+              {editing ? "Modification en cours..." : "L'IA travaille sur ton site..."}
+            </h3>
             <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 14, marginBottom: 32 }}>Analyse • Design • Code • Optimisation</p>
             <div style={{ width: "100%", maxWidth: 400, height: 5, borderRadius: 10, background: "rgba(255,255,255,0.04)", overflow: "hidden", margin: "0 auto" }}>
               <div style={{ height: "100%", borderRadius: 10, background: s.grad, width: `${progress}%`, transition: "width 0.5s ease" }} />
@@ -668,14 +666,14 @@ RÈGLES ABSOLUES :
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,68,68,0.1)", margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>⚠</div>
             <p style={{ color: "#ff4466", fontSize: 15, marginBottom: 24 }}>{error}</p>
-            <button onClick={() => { setStep(1); setError(null); }} style={{
+            <button onClick={() => { setStep(result ? 3 : 1); setError(null); }} style={{
               padding: "11px 28px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)",
               background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontFamily: s.fontBody, fontSize: 14,
-            }}>← Recommencer</button>
+            }}>← Retour</button>
           </div>
         )}
 
-        {/* STEP 3 */}
+        {/* STEP 3: Result */}
         {step === 3 && result && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
@@ -693,13 +691,14 @@ RÈGLES ABSOLUES :
                     fontSize: 12, fontFamily: s.fontBody,
                   }}>{mode === "desktop" ? "🖥 Desktop" : "📱 Mobile"}</button>
                 ))}
-                <button onClick={() => { setStep(1); setResult(null); setDescription(""); setUrl(""); }} style={{
+                <button onClick={() => { setStep(1); setResult(null); setDescription(""); setUrl(""); setEditing(false); setEditPrompt(""); }} style={{
                   padding: "6px 14px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.06)",
                   background: "transparent", color: "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, fontFamily: s.fontBody,
                 }}>← Nouveau</button>
               </div>
             </div>
 
+            {/* Browser preview with srcDoc */}
             <div style={{
               borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)",
               margin: "0 auto", maxWidth: viewMode === "mobile" ? 375 : "100%", transition: "max-width 0.4s ease",
@@ -715,15 +714,77 @@ RÈGLES ABSOLUES :
                 </div>
                 <div style={{ flex: 1, textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: s.fontBody }}>siteforgeai.com/preview</div>
               </div>
-              <iframe key={viewMode} srcDoc={result} style={{
-                width: "100%", height: viewMode === "mobile" ? 667 : 520,
-                border: "none", background: "#fff", transition: "height 0.4s ease",
-              }} title="Preview" sandbox="allow-scripts allow-same-origin" />
+              <iframe
+                key={viewMode + (result ? result.length : 0)}
+                srcDoc={result}
+                style={{
+                  width: "100%", height: viewMode === "mobile" ? 667 : 520,
+                  border: "none", background: "#fff", transition: "height 0.4s ease",
+                }}
+                title="Preview"
+                sandbox="allow-scripts allow-same-origin"
+              />
             </div>
+
+            {/* ═══ EDIT MODE (paid users only) ═══ */}
+            {isPaidUser ? (
+              <div style={{
+                marginTop: 20, padding: "20px 24px", borderRadius: 14,
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontSize: 16 }}>✏️</span>
+                  <h4 style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: s.font }}>Modifier le site</h4>
+                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <input
+                    type="text"
+                    placeholder="Ex: Change la couleur en bleu, agrandis le hero, ajoute une section témoignages..."
+                    value={editPrompt}
+                    onChange={e => setEditPrompt(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleEdit()}
+                    style={{ ...s.inputBase, flex: 1 }}
+                    onFocus={e => e.target.style.borderColor = "rgba(0,255,136,0.3)"}
+                    onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+                  />
+                  <button onClick={handleEdit} disabled={!editPrompt.trim()} style={{
+                    padding: "12px 24px", borderRadius: 10, border: "none",
+                    cursor: editPrompt.trim() ? "pointer" : "not-allowed",
+                    background: editPrompt.trim() ? s.grad : "rgba(255,255,255,0.06)",
+                    color: editPrompt.trim() ? s.bg : "rgba(255,255,255,0.2)",
+                    fontWeight: 700, fontSize: 14, fontFamily: s.font, whiteSpace: "nowrap",
+                  }}>Modifier →</button>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+                  {["Change les couleurs", "Ajoute des témoignages", "Améliore le hero", "Ajoute une section prix"].map(q => (
+                    <button key={q} onClick={() => setEditPrompt(q)} style={{
+                      padding: "4px 12px", borderRadius: 100, cursor: "pointer",
+                      background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                      color: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: s.fontBody,
+                    }}>{q}</button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                marginTop: 20, padding: "20px 24px", borderRadius: 14,
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                textAlign: "center",
+              }}>
+                <span style={{ fontSize: 16 }}>🔒</span>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8, marginBottom: 12 }}>
+                  Inscris-toi pour modifier ton site avec l'IA
+                </p>
+                <button onClick={() => onOpenAuth("signup")} style={{
+                  padding: "10px 24px", borderRadius: 10, border: "none", cursor: "pointer",
+                  background: s.grad, color: s.bg, fontWeight: 700, fontSize: 13, fontFamily: s.font,
+                }}>S'inscrire gratuitement</button>
+              </div>
+            )}
 
             {/* Publish CTA */}
             <div style={{
-              marginTop: 20, padding: "20px 24px", borderRadius: 14,
+              marginTop: 16, padding: "20px 24px", borderRadius: 14,
               background: "linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,120,255,0.04))",
               border: "1px solid rgba(0,255,136,0.12)",
               display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -739,16 +800,6 @@ RÈGLES ABSOLUES :
                 boxShadow: "0 0 24px rgba(0,255,136,0.2)", whiteSpace: "nowrap",
               }}>Choisir un plan →</button>
             </div>
-
-            <button onClick={() => {
-              const blob = new Blob([result], { type: "text/html" });
-              const a = document.createElement("a");
-              a.href = URL.createObjectURL(blob); a.download = "mon-site-siteforgeai.html"; a.click();
-            }} style={{
-              marginTop: 10, width: "100%", padding: "11px", borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.05)", background: "transparent",
-              color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 13, fontFamily: s.fontBody,
-            }}>↓ Télécharger le code HTML</button>
           </div>
         )}
       </div>
@@ -763,10 +814,10 @@ function Pricing({ onOpenAuth }) {
   const { user } = useAuth();
   const plans = [
     { name: "Starter", price: "9", desc: "Sites perso & side projects",
-      features: ["1 site publié", "Hébergement SSL", "Sous-domaine .siteforge.ai", "3 régénérations/mois", "Support email"],
+      features: ["1 site publié", "Hébergement SSL", "Sous-domaine .siteforge.ai", "3 modifications/mois", "Support email"],
       cta: "Commencer", link: CONFIG.STRIPE_LINKS.starter, hl: false },
     { name: "Pro", price: "29", desc: "Freelances & PME",
-      features: ["5 sites publiés", "Domaine personnalisé", "Régénérations illimitées", "Analytics intégrés", "Support prioritaire", "Export Shopify"],
+      features: ["5 sites publiés", "Domaine personnalisé", "Modifications illimitées", "Analytics intégrés", "Support prioritaire", "Compatible Shopify"],
       cta: "Choisir Pro", link: CONFIG.STRIPE_LINKS.pro, hl: true },
     { name: "Business", price: "79", desc: "Agences & équipes",
       features: ["Sites illimités", "Multi-domaines", "White-label", "Accès API", "Manager dédié", "SLA 99.9%"],
@@ -774,10 +825,7 @@ function Pricing({ onOpenAuth }) {
   ];
 
   const handlePlan = (link) => {
-    if (!user) {
-      onOpenAuth("signup");
-      return;
-    }
+    if (!user) { onOpenAuth("signup"); return; }
     window.open(link, "_blank");
   };
 
@@ -846,10 +894,11 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const items = [
     ["C'est vraiment gratuit pour essayer ?", "Oui ! Tu as 3 générations gratuites sans même créer de compte. Après, inscris-toi gratuitement pour continuer. Tu ne paies que si tu publies."],
+    ["Je peux modifier mon site après génération ?", "Oui ! Les utilisateurs connectés peuvent modifier leur site en décrivant les changements souhaités. L'IA applique les modifications en gardant le reste intact."],
     ["Ça marche avec Shopify ?", "Notre IA génère des pages e-commerce complètes. Tu peux utiliser le code comme base pour ton thème Shopify."],
     ["Comment fonctionne l'hébergement ?", "Hébergement haute performance avec SSL, CDN global et 99.9% d'uptime. Ton site se charge en moins d'une seconde."],
     ["Je peux utiliser mon propre domaine ?", "Oui, à partir du plan Pro (29€/mois). Le plan Starter utilise un sous-domaine .siteforge.ai."],
-    ["Mes données sont sécurisées ?", "Authentification via Supabase (même infra que des milliers de startups). Paiements sécurisés par Stripe. On ne stocke jamais tes données de carte."],
+    ["Mes données sont sécurisées ?", "Authentification sécurisée via Supabase. Paiements par Stripe. On ne stocke jamais tes données de carte."],
   ];
   return (
     <section style={{ padding: "80px 24px 120px", maxWidth: 700, margin: "0 auto" }}>
