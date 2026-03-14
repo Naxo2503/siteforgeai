@@ -6,6 +6,7 @@ import { useGenerationLimit } from "./useGenerationLimit.js";
 // CONFIG
 // ═══════════════════════════════════════════
 const CONFIG = {
+  ADMIN_EMAILS: ["naimofficielle@gmail.com"],
   STRIPE_LINKS: {
     starter: "https://buy.stripe.com/bJe9AU8980ag6uigkN9oc01",
     pro: "https://buy.stripe.com/fZucN6dtsf5acSGd8B9oc02",
@@ -607,7 +608,8 @@ function AITool({ onOpenAuth }) {
   const [editing, setEditing] = useState(false);
 
   // Simulate paid status — in prod, check Stripe subscription via Supabase
-  const isPaidUser = !!user; // For now, any logged-in user can edit. Refine later with Stripe webhook.
+  const isAdmin = !!user && CONFIG.ADMIN_EMAILS.includes(user.email);
+  const isPaidUser = isAdmin || !!user; // MVP: tous les connectés ont accès. En prod: check Stripe 
 
   const buildPrompt = (desc, existingHtml = null) => {
     const baseRules = `Tu es un designer web world-class qui crée des sites EXCEPTIONNELS. Ton travail est au niveau des meilleurs sites sur Awwwards.
