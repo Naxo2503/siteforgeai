@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   const { slug } = req.query;
   if (!slug || !slug[0]) return res.status(404).send('Site non trouvé.');
 
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
   try {
     const { data: site, error } = await supabase.from('sites')
