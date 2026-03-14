@@ -387,6 +387,206 @@ function HowItWorks() {
 }
 
 // ═══════════════════════════════════════════
+// PUBLISH PANEL
+// ═══════════════════════════════════════════
+function PublishPanel({ html, siteType, description }) {
+  const { user } = useAuth();
+  const [siteName, setSiteName] = useState("");
+  const [subdomain, setSubdomain] = useState("");
+  const [publishing, setPublishing] = useState(false);
+  const [published, setPublished] = useState(null);
+  const [pubError, setPubError] = useState(null);
+
+  const handlePublish = async () => {
+    if (!siteName.trim() || !subdomain.trim()) {
+      setPubError("Remplis le nom et le sous-domaine.");
+      return;
+    }
+    setPublishing(true);
+    setPubError(null);
+
+    try {
+      const { data: { session } } = await (await import('./supabaseClient.js')).supabase.auth.getSession();
+      const response = await fetch("/api/publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          html,
+          name: siteName,
+          subdomain: subdomain.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+          description: description || "",
+          siteType: siteType || "website",
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setPublished(data.site);
+      } else {
+        setPubError(data.error || "Erreur lors de la publication.");
+      }
+    } catch {
+      setPubError("Erreur réseau. Réessaie.");
+    }
+    setPublishing(false);
+  };
+
+  if (published) {
+    return (
+      <div style={{
+        marginTop: 16, padding: "24px", borderRadius: 14,
+        background: "linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,120,255,0.04))",
+        border: "1px solid rgba(0,255,136,0.2)", textAlign: "center",
+      }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
+        <h4 style={{ color: "#fff", fontSize: 18, fontWeight: 700, fontFamily: s.font, marginBottom: 8 }}>
+          Ton site est en ligne !
+        </h4>
+        <a href={published.url} target="_blank" rel="noopener noreferrer" style={{
+          color: s.green, fontSize: 16, fontWeight: 600, fontFamily: s.fontBody,
+          display: "inline-block", marginBottom: 16,
+        }}>
+          {published.url} ↗
+        </a>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
+          Partage ce lien avec tes clients !
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      marginTop: 16, padding: "20px 24px", borderRadius: 14,
+      background: "linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,120,255,0.04))",
+      border: "1px solid rgba(0,255,136,0.12)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <span style={{ fontSize: 16 }}>🚀</span>
+        <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: s.font }}>Publier ton site</h4>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <input
+          type="text" placeholder="Nom du site (ex: Boulangerie Martin)"
+          value={siteName} onChange={e => setSiteName(e.target.value)}
+          style={s.inputBase}
+          onFocus={e => e.target.style.borderColor = "rgba(0,255,136,0.3)"}
+          onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+        />
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+            <input
+              type="text" placeholder="mon-site"
+              value={subdomain}
+              onChange={e => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+              style={{ ...s.inputBase, borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }}
+              onFocus={e => e.target.style.borderColor = "rgba(0,255,136,0.3)"}
+              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+            />
+            <div style={{
+              padding: "12px 14px", borderRadius: "0 10px 10px 0",
+              background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+              borderLeft: "none", color: "rgba(255,255,255,0.3)", fontSize: 13,
+              fontFamily: s.fontBody, whiteSpace: "nowrap",
+            }}>.siteforgeai.org</div>
+          </div>
+          {subdomain && (
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginTop: 4, fontFamily: s.fontBody }}>
+              Ton site sera accessible sur : siteforgeai.org/s/{subdomain}
+            </p>
+          )}
+        </div>
+
+        {pubError && <p style={{ color: "#ff4466", fontSize: 13 }}>{pubError}</p>}
+
+        <button onClick={handlePublish} disabled={publishing || !siteName.trim() || !subdomain.trim()} style={{
+          padding: "13px 24px", borderRadius: 10, border: "none",
+          cursor: publishing ? "wait" : (siteName.trim() && subdomain.trim()) ? "pointer" : "not-allowed",
+          background: (siteName.trim() && subdomain.trim()) ? s.grad : "rgba(255,255,255,0.06)",
+          color: (siteName.trim() && subdomain.trim()) ? s.bg : "rgba(255,255,255,0.2)",
+          fontWeight: 700, fontSize: 15, fontFamily: s.font,
+          opacity: publishing ? 0.6 : 1,
+        }}>
+          {publishing ? "Publication en cours..." : "Publier maintenant 🚀"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// MY SITES DASHBOARD
+// ═══════════════════════════════════════════
+function MySites() {
+  const { user } = useAuth();
+  const [sites, setSites] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchSites = async () => {
+      try {
+        const { data: { session } } = await (await import('./supabaseClient.js')).supabase.auth.getSession();
+        const response = await fetch("/api/my-sites", {
+          headers: { "Authorization": `Bearer ${session.access_token}` },
+        });
+        const data = await response.json();
+        setSites(data.sites || []);
+      } catch { }
+      setLoading(false);
+    };
+    fetchSites();
+  }, [user]);
+
+  if (!user || (sites.length === 0 && !loading)) return null;
+
+  return (
+    <section style={{ padding: "40px 24px 80px", maxWidth: 880, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+        <span style={{ fontSize: 20 }}>📂</span>
+        <h3 style={{ color: "#fff", fontSize: 20, fontWeight: 700, fontFamily: s.font }}>Mes sites publiés</h3>
+      </div>
+
+      {loading ? (
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>Chargement...</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {sites.map(site => (
+            <div key={site.id} style={{
+              padding: "16px 20px", borderRadius: 12,
+              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              flexWrap: "wrap", gap: 12,
+            }}>
+              <div>
+                <h4 style={{ color: "#fff", fontSize: 15, fontWeight: 600, fontFamily: s.font, marginBottom: 4 }}>{site.name}</h4>
+                <a href={site.url} target="_blank" rel="noopener noreferrer" style={{
+                  color: s.green, fontSize: 13, fontFamily: s.fontBody,
+                }}>{site.url} ↗</a>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{
+                  padding: "4px 10px", borderRadius: 100, fontSize: 11,
+                  background: site.status === "published" ? "rgba(0,255,136,0.1)" : "rgba(255,255,255,0.05)",
+                  color: site.status === "published" ? s.green : "rgba(255,255,255,0.3)",
+                  fontFamily: s.fontBody,
+                }}>
+                  {site.status === "published" ? "● En ligne" : "● Brouillon"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════
 // AI TOOL — with auth gate + edit mode
 // ═══════════════════════════════════════════
 function AITool({ onOpenAuth }) {
@@ -782,24 +982,28 @@ Demande de l'utilisateur : "${desc}"`;
               </div>
             )}
 
-            {/* Upgrade CTA */}
-            <div style={{
-              marginTop: 16, padding: "20px 24px", borderRadius: 14,
-              background: "linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,120,255,0.04))",
-              border: "1px solid rgba(0,255,136,0.12)",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              flexWrap: "wrap", gap: 16,
-            }}>
-              <div>
-                <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginBottom: 4, fontFamily: s.font }}>Tu veux aller plus loin ?</h4>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Éditions illimitées, export du code, support prioritaire</p>
+            {/* ═══ PUBLISH FLOW ═══ */}
+            {isPaidUser ? (
+              <PublishPanel html={result} siteType={siteType} description={description} />
+            ) : (
+              <div style={{
+                marginTop: 16, padding: "20px 24px", borderRadius: 14,
+                background: "linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,120,255,0.04))",
+                border: "1px solid rgba(0,255,136,0.12)",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                flexWrap: "wrap", gap: 16,
+              }}>
+                <div>
+                  <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginBottom: 4, fontFamily: s.font }}>Publie ton site en un clic</h4>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Connecte-toi pour publier sur un sous-domaine gratuit</p>
+                </div>
+                <button onClick={() => onOpenAuth("signup")} style={{
+                  padding: "12px 28px", borderRadius: 10, border: "none", cursor: "pointer",
+                  background: s.grad, color: s.bg, fontWeight: 700, fontSize: 14, fontFamily: s.font,
+                  boxShadow: "0 0 24px rgba(0,255,136,0.2)", whiteSpace: "nowrap",
+                }}>S'inscrire pour publier →</button>
               </div>
-              <button onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} style={{
-                padding: "12px 28px", borderRadius: 10, border: "none", cursor: "pointer",
-                background: s.grad, color: s.bg, fontWeight: 700, fontSize: 14, fontFamily: s.font,
-                boxShadow: "0 0 24px rgba(0,255,136,0.2)", whiteSpace: "nowrap",
-              }}>Voir les plans →</button>
-            </div>
+            )}
 
             {/* Export code - paid users only */}
             {isPaidUser && (
@@ -827,13 +1031,13 @@ function Pricing({ onOpenAuth }) {
   const { user } = useAuth();
   const plans = [
     { name: "Starter", price: "9", desc: "Pour les débutants",
-      features: ["Générations IA illimitées", "Mode édition par prompt (3/mois)", "Preview desktop & mobile", "Export code source", "Support email"],
+      features: ["1 site publié en ligne", "Sous-domaine .siteforgeai.org", "Hébergement inclus + SSL", "3 modifications/mois", "Support email"],
       cta: "Commencer", link: CONFIG.STRIPE_LINKS.starter, hl: false },
     { name: "Pro", price: "29", desc: "Freelances & PME",
-      features: ["Tout Starter inclus", "Éditions illimitées par prompt", "Génération e-commerce / Shopify", "Accès prioritaire aux nouvelles features", "Support prioritaire sous 48h"],
+      features: ["5 sites publiés en ligne", "Domaine personnalisé (bientôt)", "Modifications illimitées", "Export code source", "Support prioritaire", "Compatible Shopify"],
       cta: "Choisir Pro", link: CONFIG.STRIPE_LINKS.pro, hl: true },
     { name: "Business", price: "79", desc: "Agences & équipes",
-      features: ["Tout Pro inclus", "Usage commercial illimité", "Support dédié sous 24h", "Sessions consulting IA", "Hébergement inclus (bientôt)"],
+      features: ["Sites illimités", "Multi-domaines", "White-label (bientôt)", "Export code source", "Support dédié sous 24h", "Accès prioritaire nouvelles features"],
       cta: "Nous contacter", link: CONFIG.STRIPE_LINKS.business, hl: false },
   ];
 
@@ -993,6 +1197,7 @@ export default function App() {
         <Features />
         <HowItWorks />
         <AITool onOpenAuth={openAuth} />
+        <MySites />
         <Pricing onOpenAuth={openAuth} />
         <FAQ />
         <Footer />
